@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ls-web-user-frontend
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # Delivery / P1 backend URL the user-facing app talks to.
+      - key: VITE_BACKEND_URL
+        value: "https://ls-pull-push-backend.onrender.com"
+      # Prototype: disable the Firebase login wall (delivery flow needs no login).
+      # Set to "true" later once the Firebase web client config is supplied.
+      - key: VITE_REQUIRE_AUTH
+        value: "false"

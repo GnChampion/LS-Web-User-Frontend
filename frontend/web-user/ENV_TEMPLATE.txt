@@ -1,0 +1,16 @@
+# Copy this content to create your .env file
+# File: website-userend/.env
+
+VITE_FIREBASE_API_KEY=AIzaSyAPjTmFiaHLXtqO21I6NcorUMB3a6sjFKQ
+VITE_FIREBASE_AUTH_DOMAIN=land-scanner-webapp.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=land-scanner-webapp
+VITE_FIREBASE_STORAGE_BUCKET=land-scanner-webapp.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=516405024853
+VITE_FIREBASE_APP_ID=1:516405024853:web:05aff4e6bd147722891cdc
+
+# Backend API URL
+# For local development:
+VITE_BACKEND_URL=http://localhost:8000
+
+# For production (update with your deployed backend URL):
+# VITE_BACKEND_URL=https://land-scanner-backend.onrender.com

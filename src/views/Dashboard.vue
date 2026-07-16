@@ -52,11 +52,11 @@
               </div>
             </router-link>
 
-            <router-link to="/analyze" class="action-card">
-              <div class="action-icon">🛰️</div>
+            <router-link to="/requests" class="action-card">
+              <div class="action-icon">📋</div>
               <div>
-                <div class="action-title">Run Analysis</div>
-                <div class="action-desc">Optical, weather, hydrology & more</div>
+                <div class="action-title">My Requests</div>
+                <div class="action-desc">Track zone request status</div>
               </div>
             </router-link>
           </div>
@@ -103,8 +103,8 @@
                 <div class="zone-info-item">
                   <span class="zone-info-label">📍 Coordinates:</span>
                   <span class="zone-info-value">
-                    {{ zone.coordinates.latitude.toFixed(4) }}, 
-                    {{ zone.coordinates.longitude.toFixed(4) }}
+                    {{ zone.coordinates?.latitude?.toFixed(4) ?? 'N/A' }}, 
+                    {{ zone.coordinates?.longitude?.toFixed(4) ?? 'N/A' }}
                   </span>
                 </div>
                 <div class="zone-info-item">

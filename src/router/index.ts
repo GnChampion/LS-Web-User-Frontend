@@ -1,6 +1,7 @@
 ﻿import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useZonesStore } from '@/stores/zones'
+import { useDeliveryStore } from '@/stores/delivery'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -86,6 +87,11 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, _from, next) => {
+  // Stop any active delivery listener when navigating away from zone detail
+  if (_from.name === 'zone-detail' && to.name !== 'zone-detail') {
+    useDeliveryStore().stopWatching()
+  }
+
   // Don't carry a previous page's error banner into the next page.
   useZonesStore().clearError()
 

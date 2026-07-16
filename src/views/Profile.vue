@@ -43,17 +43,22 @@
                 <span class="tier-icon">⭐</span>
                 <span class="tier-name">{{ tierName }}</span>
               </div>
-              <span
-                class="badge"
-                :class="{
-                  'badge-gray': tierLevel === 'free',
-                  'badge-primary': tierLevel === 'standard',
-                  'badge-warning': tierLevel === 'pro',
-                  'badge-success': tierLevel === 'enterprise'
-                }"
-              >
-                {{ tierLevel.toUpperCase() }}
-              </span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span
+                  class="badge"
+                  :class="{
+                    'badge-gray': tierLevel === 'free',
+                    'badge-primary': tierLevel === 'standard',
+                    'badge-warning': tierLevel === 'pro',
+                    'badge-success': tierLevel === 'enterprise'
+                  }"
+                >
+                  {{ tierLevel.toUpperCase() }}
+                </span>
+                <span v-if="subscriptionStatus" class="badge" :class="subscriptionStatus === 'active' ? 'badge-success' : 'badge-warning'">
+                  {{ subscriptionStatus }}
+                </span>
+              </div>
             </div>
 
             <div class="tier-features">
@@ -155,6 +160,7 @@ const zonesStore = useZonesStore()
 
 const tierName = computed(() => authStore.userTier?.tier_name || 'Free')
 const tierLevel = computed(() => authStore.userTier?.tier_level || 'free')
+const subscriptionStatus = computed(() => (authStore.userTier as any)?.subscription_status || null)
 const zonesLimit = computed(() => {
   const limit = authStore.userTier?.zones_limit
   return limit === -1 || !limit ? 'Unlimited' : limit

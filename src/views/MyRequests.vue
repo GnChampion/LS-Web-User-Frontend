@@ -64,8 +64,8 @@
                 <div class="detail-row">
                   <span class="detail-label">📍 Coordinates:</span>
                   <span class="detail-value">
-                    {{ request.coordinates.latitude.toFixed(6) }}, 
-                    {{ request.coordinates.longitude.toFixed(6) }}
+                    {{ request.coordinates?.latitude?.toFixed(6) ?? 'N/A' }}, 
+                    {{ request.coordinates?.longitude?.toFixed(6) ?? 'N/A' }}
                   </span>
                 </div>
 
@@ -78,7 +78,7 @@
 
                 <div class="detail-row">
                   <span class="detail-label">⭐ Quality:</span>
-                  <span class="detail-value">{{ request.quality.toUpperCase() }}</span>
+                  <span class="detail-value">{{ (request.quality ?? 'N/A').toUpperCase() }}</span>
                 </div>
 
                 <div class="detail-row" v-if="request.notes">

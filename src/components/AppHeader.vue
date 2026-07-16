@@ -9,8 +9,6 @@
         <!-- Desktop Nav -->
         <nav class="header-nav desktop-nav">
           <router-link to="/" class="nav-link" exact-active-class="active">Dashboard</router-link>
-          <router-link to="/analyze" class="nav-link" active-class="active">Analyze</router-link>
-          <router-link to="/analyses" class="nav-link" active-class="active">Results</router-link>
           <router-link to="/zones" class="nav-link" active-class="active">My Zones</router-link>
           <router-link to="/requests" class="nav-link" active-class="active">Requests</router-link>
           <router-link to="/profile" class="nav-link" active-class="active">Profile</router-link>
@@ -28,8 +26,6 @@
     <div v-if="menuOpen" class="mobile-nav" @click="menuOpen = false">
       <div class="mobile-nav-inner" @click.stop>
         <router-link to="/" class="mobile-nav-link" exact-active-class="active" @click="menuOpen = false">Dashboard</router-link>
-        <router-link to="/analyze" class="mobile-nav-link" active-class="active" @click="menuOpen = false">Analyze</router-link>
-        <router-link to="/analyses" class="mobile-nav-link" active-class="active" @click="menuOpen = false">Results</router-link>
         <router-link to="/zones" class="mobile-nav-link" active-class="active" @click="menuOpen = false">My Zones</router-link>
         <router-link to="/requests" class="mobile-nav-link" active-class="active" @click="menuOpen = false">Requests</router-link>
         <router-link to="/profile" class="mobile-nav-link" active-class="active" @click="menuOpen = false">Profile</router-link>

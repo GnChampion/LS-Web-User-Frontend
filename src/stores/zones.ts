@@ -75,7 +75,6 @@ export const useZonesStore = defineStore('zones', () => {
     error.value = null
     try {
       await apiService.requestZone(data)
-      // Reload requests after submitting
       await loadUserRequests(data.user_id)
       return true
     } catch (err: any) {
@@ -87,6 +86,20 @@ export const useZonesStore = defineStore('zones', () => {
         error.value = message
       }
       return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function requestZoneV2(v1: { lat: number; lon: number } | null, v2: { coordinates: [number, number][] } | null, quality = 'high') {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await apiService.requestZoneV2(v1, v2, quality)
+      return response
+    } catch (err: any) {
+      error.value = err?.response?.data?.detail || err?.message || 'Failed to submit zone'
+      return null
     } finally {
       loading.value = false
     }
@@ -112,6 +125,7 @@ export const useZonesStore = defineStore('zones', () => {
     loadZoneImages,
     loadUserRequests,
     requestNewZone,
+    requestZoneV2,
     clearError,
     setError
   }

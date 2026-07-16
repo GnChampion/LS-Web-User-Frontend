@@ -122,7 +122,6 @@ import { useAuthStore } from '@/stores/auth'
 import { useZonesStore } from '@/stores/zones'
 import DrawZone from '@/components/DrawZone.vue'
 import AppHeader from '@/components/AppHeader.vue'
-import { BACKEND_URL } from '@/services/api'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -176,36 +175,29 @@ const handleSubmit = async () => {
     return
   }
 
-  const success = await zonesStore.requestNewZone({
-    user_id: authStore.userId,
-    coordinates: {
-      latitude: formData.latitude,
-      longitude: formData.longitude,
-      altitude: formData.altitude || 100
-    },
-    zone_area: formData.areaSize ? { size_feet: formData.areaSize } : undefined,
-    quality: formData.quality,
-    notes: formData.notes || undefined
-  })
+  const v1 = { lat: formData.latitude, lon: formData.longitude }
+  const v2 = hasV2.value
+    ? { coordinates: polygon.value as [number, number][] }
+    : null
 
+  const result = await zonesStore.requestZoneV2(v1, v2, formData.quality)
   loading.value = false
 
-  if (zonesStore.error && (zonesStore.error.includes('Network Error') || zonesStore.error.includes('fetch'))) {
-    error.value = 'Cannot connect to backend server. Make sure the backend is running at ' + BACKEND_URL
-  } else if (!success && zonesStore.error) {
-    error.value = zonesStore.error
+  if (!result) {
+    error.value = zonesStore.error || 'Failed to submit zone'
+    return
   }
 
-  if (success) {
-    successMessage.value = 'Zone request submitted successfully!'
-    setTimeout(() => router.push('/requests'), 2000)
+  if (result.status === 'blocked') {
+    error.value = result.message || 'Zone overlaps an existing zone'
+    return
   }
+
+  successMessage.value = 'Zone created successfully!'
+  setTimeout(() => router.push('/zones'), 2000)
 }
 
-const handleLogout = async () => {
-  await authStore.signOut()
-  router.push('/login')
-}
+
 </script>
 
 <style scoped>

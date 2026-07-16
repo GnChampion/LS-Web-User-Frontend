@@ -65,8 +65,38 @@ export interface ZoneRequest {
   zone_id?: string
 }
 
-// Admin-generated, tier-limited extract pushed to Firebase P2 (user DB).
-// v1 and v2 are stored SEPARATELY, keyed by (zone_id, version).
+// ── New two-path delivery types (spec v2) ────────────────────────────────────
+
+export interface DeliverySpec {
+  output_type: string
+  resolution: string
+  aoi_version: string
+  image_urls: string[]
+  data: Record<string, any>
+  provider: string
+  captured_at: string
+  coverage_pct: number
+  adjustment_reason?: string
+}
+
+// One document per zone per module in P2 `delivered_data` collection.
+// Doc ID format: `{zone_id}_{module}`
+export interface DeliveredData {
+  zone_id: string
+  module: string
+  user_id: string
+  task_id: string
+  status: 'pending' | 'partial' | 'complete' | 'permanently_adjusted'
+  delivery_1: DeliverySpec | null   // requirement spec (what was asked)
+  delivery_2: DeliverySpec | null   // availability spec (what was delivered, if partial)
+  quality_score: number | null
+  attempt_number: number
+  version: number
+  created_at?: any
+  updated_at?: any
+}
+
+// Legacy types kept for backward compat
 export interface DeliveredVersion {
   version: 'v1' | 'v2'
   tier: string

@@ -106,12 +106,12 @@ const handleRegister = async () => {
   successMessage.value = ''
   
   if (password.value !== confirmPassword.value) {
-    authStore.error = 'Passwords do not match'
+    authStore.setValidationError('Passwords do not match')
     return
   }
   
   if (password.value.length < 6) {
-    authStore.error = 'Password must be at least 6 characters'
+    authStore.setValidationError('Password must be at least 6 characters')
     return
   }
   

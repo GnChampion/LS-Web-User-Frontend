@@ -1,17 +1,22 @@
 <template>
   <div id="app">
-    <router-view />
+    <div v-if="initializing" class="app-loading">
+      <div class="loading loading-lg" style="border-color: rgba(102,126,234,0.3); border-top-color: #667eea;"></div>
+    </div>
+    <router-view v-else />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
+const initializing = ref(true)
 
 onMounted(async () => {
   await authStore.checkAuth()
+  initializing.value = false
 })
 </script>
 
@@ -31,5 +36,13 @@ body {
 
 #app {
   min-height: 100vh;
+}
+
+.app-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fa;
 }
 </style>

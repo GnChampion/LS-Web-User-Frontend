@@ -1,21 +1,6 @@
 <template>
   <div class="page">
-    <header class="header">
-      <div class="container">
-        <div class="header-content">
-          <div class="header-brand">
-            <h1 class="brand-title">🛰️ Land Scanner</h1>
-          </div>
-          <nav class="header-nav">
-            <router-link to="/" class="nav-link">Dashboard</router-link>
-            <router-link to="/analyze" class="nav-link">Analyze</router-link>
-            <router-link to="/analyses" class="nav-link">Results</router-link>
-            <router-link to="/profile" class="nav-link">Profile</router-link>
-            <button @click="handleLogout" class="btn btn-secondary btn-sm">Logout</button>
-          </nav>
-        </div>
-      </div>
-    </header>
+    <AppHeader />
 
     <main class="main-content">
       <div class="container-sm">
@@ -91,11 +76,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { apiService } from '@/services/api'
+import AppHeader from '@/components/AppHeader.vue'
 
-const router = useRouter()
 const authStore = useAuthStore()
 
 const ALL_MODULES = ['optical', 'spectral', 'elevation', 'radar', 'land-cover', 'weather', 'hydrology']
@@ -131,6 +115,7 @@ async function runAnalysis() {
       lon: parseFloat(lon.value),
       modules: selected.value,
       time: time.value || undefined,
+      user_id: authStore.userId || undefined,
       params
     })
     result.value = data
@@ -139,11 +124,6 @@ async function runAnalysis() {
   } finally {
     loading.value = false
   }
-}
-
-const handleLogout = async () => {
-  await authStore.signOut()
-  router.push('/login')
 }
 </script>
 

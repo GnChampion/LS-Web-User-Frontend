@@ -1,19 +1,6 @@
 <template>
   <div class="page">
-    <header class="header">
-      <div class="container">
-        <div class="header-content">
-          <div class="header-brand"><h1 class="brand-title">🛰️ Land Scanner</h1></div>
-          <nav class="header-nav">
-            <router-link to="/" class="nav-link">Dashboard</router-link>
-            <router-link to="/zones" class="nav-link">My Zones</router-link>
-            <router-link to="/requests" class="nav-link">Requests</router-link>
-            <router-link to="/profile" class="nav-link">Profile</router-link>
-            <button @click="handleLogout" class="btn btn-secondary btn-sm">Logout</button>
-          </nav>
-        </div>
-      </div>
-    </header>
+    <AppHeader />
 
     <main class="main-content">
       <div class="container-sm">
@@ -134,6 +121,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useZonesStore } from '@/stores/zones'
 import DrawZone from '@/components/DrawZone.vue'
+import AppHeader from '@/components/AppHeader.vue'
 import { BACKEND_URL } from '@/services/api'
 
 const router = useRouter()
@@ -222,13 +210,6 @@ const handleLogout = async () => {
 
 <style scoped>
 .page { min-height: 100vh; background: var(--gray-50); }
-.header { background: white; border-bottom: 1px solid var(--gray-200); padding: var(--spacing-md) 0; position: sticky; top: 0; z-index: 100; }
-.header-content { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-lg); }
-.brand-title { font-size: 20px; font-weight: 700; color: var(--gray-800); margin: 0; }
-.header-nav { display: flex; align-items: center; gap: var(--spacing-md); }
-.nav-link { padding: 8px 16px; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; color: var(--gray-600); transition: all 0.2s; }
-.nav-link:hover { background: var(--gray-100); color: var(--gray-800); }
-.nav-link.active { background: var(--primary); color: white; }
 .main-content { padding: var(--spacing-xl) 0; }
 .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); }
 .form-actions { display: flex; gap: var(--spacing-md); justify-content: flex-end; margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--gray-200); }
@@ -242,7 +223,6 @@ const handleLogout = async () => {
 .vt-v1.on { background: #dc2626; border-color: #dc2626; }
 .vt-v2.on { background: #2563eb; border-color: #2563eb; }
 @media (max-width: 768px) {
-  .header-nav { display: none; }
   .form-row { grid-template-columns: 1fr; }
   .form-actions { flex-direction: column; }
   .form-actions .btn { width: 100%; }

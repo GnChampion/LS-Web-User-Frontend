@@ -1,26 +1,6 @@
 <template>
   <div class="dashboard-page">
-    <!-- Header -->
-    <header class="header">
-      <div class="container">
-        <div class="header-content">
-          <div class="header-brand">
-            <h1 class="brand-title">🛰️ Land Scanner</h1>
-          </div>
-          <nav class="header-nav">
-            <router-link to="/" class="nav-link active">Dashboard</router-link>
-            <router-link to="/analyze" class="nav-link">Analyze</router-link>
-            <router-link to="/analyses" class="nav-link">Results</router-link>
-            <router-link to="/zones" class="nav-link">My Zones</router-link>
-            <router-link to="/requests" class="nav-link">Requests</router-link>
-            <router-link to="/profile" class="nav-link">Profile</router-link>
-            <button @click="handleLogout" class="btn btn-secondary btn-sm">
-              Logout
-            </button>
-          </nav>
-        </div>
-      </div>
-    </header>
+    <AppHeader />
 
     <!-- Main Content -->
     <main class="main-content">
@@ -40,9 +20,9 @@
           </div>
           
           <div class="stat-card">
-            <div class="stat-icon">🖼️</div>
-            <div class="stat-value">{{ totalImages }}</div>
-            <div class="stat-label">Satellite Images</div>
+            <div class="stat-icon">📋</div>
+            <div class="stat-value">{{ zonesStore.userRequests.length }}</div>
+            <div class="stat-label">Zone Requests</div>
           </div>
           
           <div class="stat-card">
@@ -92,7 +72,7 @@
           </div>
 
           <!-- Loading State -->
-          <div v-if="zonesStore.loading" class="loading-container">
+          <div v-if="dashLoading" class="loading-container">
             <div class="loading loading-lg"></div>
             <p class="text-muted mt-md">Loading zones...</p>
           </div>
@@ -117,7 +97,7 @@
             >
               <div class="zone-header">
                 <h4 class="zone-name">{{ zone.zone_name }}</h4>
-                <span class="badge badge-primary">{{ zone.quality.toUpperCase() }}</span>
+                <span class="badge badge-primary">{{ zone.quality?.toUpperCase() ?? 'N/A' }}</span>
               </div>
               <div class="zone-info">
                 <div class="zone-info-item">
@@ -143,88 +123,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useZonesStore } from '@/stores/zones'
+import AppHeader from '@/components/AppHeader.vue'
 
-const router = useRouter()
 const authStore = useAuthStore()
 const zonesStore = useZonesStore()
 
-const totalImages = ref(0)
-
-const recentZones = computed(() => {
-  return zonesStore.zones.slice(0, 6)
-})
+const recentZones = computed(() => zonesStore.zones.slice(0, 6))
+const dashLoading = ref(false)
 
 onMounted(async () => {
   if (authStore.userId) {
-    await zonesStore.loadUserZones(authStore.userId)
-    // Calculate total images (simplified)
-    totalImages.value = zonesStore.zones.length * 5 // Placeholder
+    dashLoading.value = true
+    await Promise.all([
+      zonesStore.loadUserZones(authStore.userId),
+      zonesStore.loadUserRequests(authStore.userId)
+    ])
+    dashLoading.value = false
   }
 })
-
-const handleLogout = async () => {
-  await authStore.signOut()
-  router.push('/login')
-}
 </script>
 
 <style scoped>
 .dashboard-page {
   min-height: 100vh;
   background: var(--gray-50);
-}
-
-/* Header */
-.header {
-  background: white;
-  border-bottom: 1px solid var(--gray-200);
-  padding: var(--spacing-md) 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-lg);
-}
-
-.brand-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--gray-800);
-  margin: 0;
-}
-
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.nav-link {
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--gray-600);
-  transition: all 0.2s;
-}
-
-.nav-link:hover {
-  background: var(--gray-100);
-  color: var(--gray-800);
-}
-
-.nav-link.active {
-  background: var(--primary);
-  color: white;
 }
 
 /* Main Content */
@@ -395,20 +320,8 @@ const handleLogout = async () => {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .header-nav {
-    display: none;
-  }
-  
   .page-title {
     font-size: 24px;
-  }
-  
-  .grid-3 {
-    grid-template-columns: 1fr;
-  }
-  
-  .grid-2 {
-    grid-template-columns: 1fr;
   }
 }
 </style>

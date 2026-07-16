@@ -65,6 +65,7 @@ export const useZonesStore = defineStore('zones', () => {
 
   async function requestNewZone(data: {
     user_id: string
+    zone_name?: string
     coordinates: { latitude: number; longitude: number; altitude: number }
     zone_area?: { size_feet: number }
     quality: string
@@ -95,6 +96,10 @@ export const useZonesStore = defineStore('zones', () => {
     error.value = null
   }
 
+  function setError(msg: string) {
+    error.value = msg
+  }
+
   return {
     zones,
     currentZone,
@@ -107,6 +112,7 @@ export const useZonesStore = defineStore('zones', () => {
     loadZoneImages,
     loadUserRequests,
     requestNewZone,
-    clearError
+    clearError,
+    setError
   }
 })

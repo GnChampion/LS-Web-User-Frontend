@@ -35,8 +35,9 @@ export const useAuthStore = defineStore('auth', () => {
         userTier.value = await apiService.getUserTier(currentUser.uid)
       }
     } catch (err: any) {
-      console.error('Auth check error:', err)
-      error.value = err.message
+      const msg = String(err?.message ?? err).replace(/[\r\n]/g, ' ')
+      console.error('Auth check error:', msg)
+      error.value = msg
     } finally {
       loading.value = false
     }
@@ -137,6 +138,10 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
   }
 
+  function setValidationError(msg: string) {
+    error.value = msg
+  }
+
   return {
     user,
     userTier,
@@ -150,6 +155,7 @@ export const useAuthStore = defineStore('auth', () => {
     signUp,
     signOut,
     sendPasswordReset,
-    clearError
+    clearError,
+    setValidationError
   }
 })

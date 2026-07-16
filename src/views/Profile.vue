@@ -1,24 +1,6 @@
 <template>
   <div class="page">
-    <!-- Header -->
-    <header class="header">
-      <div class="container">
-        <div class="header-content">
-          <div class="header-brand">
-            <h1 class="brand-title">🛰️ Land Scanner</h1>
-          </div>
-          <nav class="header-nav">
-            <router-link to="/" class="nav-link">Dashboard</router-link>
-            <router-link to="/zones" class="nav-link">My Zones</router-link>
-            <router-link to="/requests" class="nav-link">Requests</router-link>
-            <router-link to="/profile" class="nav-link active">Profile</router-link>
-            <button @click="handleLogout" class="btn btn-secondary btn-sm">
-              Logout
-            </button>
-          </nav>
-        </div>
-      </div>
-    </header>
+    <AppHeader />
 
     <!-- Main Content -->
     <main class="main-content">
@@ -165,6 +147,7 @@ import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useZonesStore } from '@/stores/zones'
+import AppHeader from '@/components/AppHeader.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -219,55 +202,6 @@ const handleLogout = async () => {
 .page {
   min-height: 100vh;
   background: var(--gray-50);
-}
-
-/* Header */
-.header {
-  background: white;
-  border-bottom: 1px solid var(--gray-200);
-  padding: var(--spacing-md) 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-lg);
-}
-
-.brand-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--gray-800);
-  margin: 0;
-}
-
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.nav-link {
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--gray-600);
-  transition: all 0.2s;
-}
-
-.nav-link:hover {
-  background: var(--gray-100);
-  color: var(--gray-800);
-}
-
-.nav-link.active {
-  background: var(--primary);
-  color: white;
 }
 
 /* Main Content */
@@ -421,20 +355,8 @@ const handleLogout = async () => {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .header-nav {
-    display: none;
-  }
-
-  .page-title {
-    font-size: 24px;
-  }
-
-  .tier-features {
-    grid-template-columns: 1fr;
-  }
-
-  .stats-section {
-    grid-template-columns: 1fr;
-  }
+  .page-title { font-size: 24px; }
+  .tier-features { grid-template-columns: 1fr; }
+  .stats-section { grid-template-columns: 1fr; }
 }
 </style>

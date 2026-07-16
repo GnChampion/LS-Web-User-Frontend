@@ -1,21 +1,6 @@
 <template>
   <div class="page">
-    <header class="header">
-      <div class="container">
-        <div class="header-content">
-          <div class="header-brand">
-            <h1 class="brand-title">🛰️ Land Scanner</h1>
-          </div>
-          <nav class="header-nav">
-            <router-link to="/" class="nav-link">Dashboard</router-link>
-            <router-link to="/analyze" class="nav-link">Analyze</router-link>
-            <router-link to="/analyses" class="nav-link">Results</router-link>
-            <router-link to="/profile" class="nav-link">Profile</router-link>
-            <button @click="handleLogout" class="btn btn-secondary btn-sm">Logout</button>
-          </nav>
-        </div>
-      </div>
-    </header>
+    <AppHeader />
 
     <main class="main-content">
       <div class="container">
@@ -61,12 +46,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { apiService } from '@/services/api'
-
-const router = useRouter()
-const authStore = useAuthStore()
+import AppHeader from '@/components/AppHeader.vue'
 
 const list = ref<any[]>([])
 const loading = ref(true)
@@ -78,7 +59,8 @@ function badgeClass(status: string) {
     : status === 'partial' ? 'badge-warning' : 'badge-error'
 }
 function modulesOf(a: any) {
-  try { return (JSON.parse(a.modules) as string[]).join(', ') } catch { return a.modules }
+  if (Array.isArray(a.modules)) return a.modules.join(', ')
+  try { return (JSON.parse(a.modules) as string[]).join(', ') } catch { return String(a.modules ?? '') }
 }
 function fmt(v: any) {
   if (!v) return '—'
@@ -104,14 +86,12 @@ onMounted(async () => {
     loading.value = false
   }
 })
-
-const handleLogout = async () => {
-  await authStore.signOut()
-  router.push('/login')
-}
 </script>
 
 <style scoped>
+.main-content { padding: var(--spacing-xl) 0; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-xl); }
+.page-title { font-size: 32px; font-weight: 700; color: var(--gray-800); }
 .result-block { border-top: 1px solid var(--gray-100); padding: 12px 0; }
 .result-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .result-json {

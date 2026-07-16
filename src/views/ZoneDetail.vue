@@ -1,24 +1,6 @@
 <template>
   <div class="page">
-    <!-- Header -->
-    <header class="header">
-      <div class="container">
-        <div class="header-content">
-          <div class="header-brand">
-            <h1 class="brand-title">🛰️ Land Scanner</h1>
-          </div>
-          <nav class="header-nav">
-            <router-link to="/" class="nav-link">Dashboard</router-link>
-            <router-link to="/zones" class="nav-link">My Zones</router-link>
-            <router-link to="/requests" class="nav-link">Requests</router-link>
-            <router-link to="/profile" class="nav-link">Profile</router-link>
-            <button @click="handleLogout" class="btn btn-secondary btn-sm">
-              Logout
-            </button>
-          </nav>
-        </div>
-      </div>
-    </header>
+    <AppHeader />
 
     <!-- Main Content -->
     <main class="main-content">
@@ -101,14 +83,17 @@
                   {{ zonesStore.zoneImages.length }} image{{ zonesStore.zoneImages.length !== 1 ? 's' : '' }} collected
                 </p>
               </div>
-              <button @click="refreshImages" class="btn btn-secondary btn-sm" :disabled="zonesStore.loading">
-                <span v-if="zonesStore.loading" class="loading"></span>
+              <button @click="refreshImages" class="btn btn-secondary btn-sm" :disabled="imagesLoading">
+                <span v-if="imagesLoading" class="loading"></span>
                 <span v-else>🔄 Refresh</span>
               </button>
             </div>
 
             <!-- No Images -->
-            <div v-if="!zonesStore.loading && zonesStore.zoneImages.length === 0" class="empty-state">
+            <div v-if="imagesLoading" class="loading-container" style="padding: var(--spacing-xl)">
+              <div class="loading"></div>
+            </div>
+            <div v-else-if="zonesStore.zoneImages.length === 0" class="empty-state">
               <div class="empty-icon">🛰️</div>
               <div class="empty-title">No images collected yet</div>
               <p class="empty-text">
@@ -181,6 +166,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useZonesStore } from '@/stores/zones'
 import type { SatelliteImage } from '@/types'
+import AppHeader from '@/components/AppHeader.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -188,28 +174,29 @@ const authStore = useAuthStore()
 const zonesStore = useZonesStore()
 
 const selectedImage = ref<SatelliteImage | null>(null)
+const imagesLoading = ref(false)
 
 onMounted(async () => {
   const zoneId = route.params.id as string
   await zonesStore.loadZone(zoneId)
+  imagesLoading.value = true
   await zonesStore.loadZoneImages(zoneId)
+  imagesLoading.value = false
 })
 
 const refreshImages = async () => {
   const zoneId = route.params.id as string
+  imagesLoading.value = true
   await zonesStore.loadZoneImages(zoneId)
+  imagesLoading.value = false
 }
 
 const openImageModal = (image: SatelliteImage) => {
   selectedImage.value = image
 }
 
-const handleLogout = async () => {
-  await authStore.signOut()
-  router.push('/login')
-}
-
-const formatDate = (date: string) => {
+const formatDate = (date: any) => {
+  if (!date) return 'N/A'
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -222,55 +209,6 @@ const formatDate = (date: string) => {
 .page {
   min-height: 100vh;
   background: var(--gray-50);
-}
-
-/* Header (reused styles) */
-.header {
-  background: white;
-  border-bottom: 1px solid var(--gray-200);
-  padding: var(--spacing-md) 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-lg);
-}
-
-.brand-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--gray-800);
-  margin: 0;
-}
-
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.nav-link {
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--gray-600);
-  transition: all 0.2s;
-}
-
-.nav-link:hover {
-  background: var(--gray-100);
-  color: var(--gray-800);
-}
-
-.nav-link.active {
-  background: var(--primary);
-  color: white;
 }
 
 /* Main Content */
@@ -472,10 +410,6 @@ const formatDate = (date: string) => {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .header-nav {
-    display: none;
-  }
-
   .images-grid {
     grid-template-columns: 1fr;
   }

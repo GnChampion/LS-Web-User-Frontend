@@ -1,24 +1,6 @@
 <template>
   <div class="page">
-    <!-- Header -->
-    <header class="header">
-      <div class="container">
-        <div class="header-content">
-          <div class="header-brand">
-            <h1 class="brand-title">🛰️ Land Scanner</h1>
-          </div>
-          <nav class="header-nav">
-            <router-link to="/" class="nav-link">Dashboard</router-link>
-            <router-link to="/zones" class="nav-link">My Zones</router-link>
-            <router-link to="/requests" class="nav-link">Requests</router-link>
-            <router-link to="/profile" class="nav-link">Profile</router-link>
-            <button @click="handleLogout" class="btn btn-secondary btn-sm">
-              Logout
-            </button>
-          </nav>
-        </div>
-      </div>
-    </header>
+    <AppHeader />
 
     <!-- Main Content -->
     <main class="main-content">
@@ -147,7 +129,7 @@
               >
                 <option value="low">Low (Quick Preview)</option>
                 <option value="medium">Medium (Standard)</option>
-                <option value="high" selected>High (Detailed)</option>
+                <option value="high">High (Detailed)</option>
                 <option value="ultra">Ultra (Maximum Detail)</option>
               </select>
             </div>
@@ -204,6 +186,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useZonesStore } from '@/stores/zones'
 import GoogleMap from '@/components/GoogleMap.vue'
+import AppHeader from '@/components/AppHeader.vue'
 import { BACKEND_URL } from '@/services/api'
 
 const router = useRouter()
@@ -240,13 +223,14 @@ const handleSubmit = async () => {
   zonesStore.clearError()
   successMessage.value = ''
 
-  if (!formData.latitude || !formData.longitude) {
-    zonesStore.error = 'Please provide valid coordinates'
+  if (formData.latitude === null || formData.longitude === null) {
+    zonesStore.setError('Please provide valid coordinates')
     return
   }
 
   const success = await zonesStore.requestNewZone({
     user_id: authStore.userId,
+    zone_name: formData.zoneName,
     coordinates: {
       latitude: formData.latitude,
       longitude: formData.longitude,
@@ -259,7 +243,7 @@ const handleSubmit = async () => {
 
   if (!success && zonesStore.error) {
     if (zonesStore.error.includes('Network Error') || zonesStore.error.includes('ERR_CONNECTION_CLOSED') || zonesStore.error.includes('fetch')) {
-      zonesStore.error = 'Cannot connect to backend server. Make sure the backend is running at ' + BACKEND_URL
+      zonesStore.setError('Cannot connect to backend server. Make sure the backend is running at ' + BACKEND_URL)
     }
   }
 
@@ -271,65 +255,12 @@ const handleSubmit = async () => {
   }
 }
 
-const handleLogout = async () => {
-  await authStore.signOut()
-  router.push('/login')
-}
 </script>
 
 <style scoped>
 .page {
   min-height: 100vh;
   background: var(--gray-50);
-}
-
-/* Header */
-.header {
-  background: white;
-  border-bottom: 1px solid var(--gray-200);
-  padding: var(--spacing-md) 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-lg);
-}
-
-.brand-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--gray-800);
-  margin: 0;
-}
-
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.nav-link {
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--gray-600);
-  transition: all 0.2s;
-}
-
-.nav-link:hover {
-  background: var(--gray-100);
-  color: var(--gray-800);
-}
-
-.nav-link.active {
-  background: var(--primary);
-  color: white;
 }
 
 /* Main Content */
@@ -383,10 +314,6 @@ const handleLogout = async () => {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .header-nav {
-    display: none;
-  }
-
   .form-row {
     grid-template-columns: 1fr;
   }

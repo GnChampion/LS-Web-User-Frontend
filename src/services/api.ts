@@ -47,6 +47,8 @@ async function ensureCsrfToken(): Promise<string | null> {
   return csrfToken
 }
 
+let csrfToken: string | null = readCsrfCookie()
+
 // Capture the CSRF token the backend issues and replay it on mutating requests.
 api.interceptors.response.use((response) => {
   const token = readCsrfCookie()
@@ -63,8 +65,6 @@ api.interceptors.request.use(async (config) => {
   return config
 })
 
-let csrfToken: string | null = readCsrfCookie()
-
 // Add auth token to requests
 api.interceptors.request.use(async (config) => {
   const token = await getAuthToken()
@@ -80,7 +80,8 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error.response?.data || error.message)
+    const msg = String(error.response?.status ?? error.message ?? 'unknown').replace(/[\r\n]/g, ' ')
+    console.error('API Error:', msg)
     return Promise.reject(error)
   }
 )
@@ -132,6 +133,7 @@ export const apiService = {
   // Request new zone
   requestZone: async (data: {
     user_id: string
+    zone_name?: string
     coordinates: { latitude: number; longitude: number; altitude: number }
     zone_area?: { size_feet: number }
     quality: string

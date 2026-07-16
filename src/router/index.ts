@@ -57,13 +57,13 @@ const router = createRouter({
       path: '/analyze',
       name: 'analyze',
       component: () => import('@/views/AnalyzeView.vue'),
-      meta: { title: 'Analyze - Land Scanner' }
+      meta: { requiresAuth: true, title: 'Analyze - Land Scanner' }
     },
     {
       path: '/analyses',
       name: 'analyses',
       component: () => import('@/views/AnalysesView.vue'),
-      meta: { title: 'Results - Land Scanner' }
+      meta: { requiresAuth: true, title: 'Results - Land Scanner' }
     },
     {
       path: '/profile',
@@ -91,12 +91,19 @@ router.beforeEach(async (to, _from, next) => {
 
   const authStore = useAuthStore()
 
-  if (authStore.user === null && !authStore.loading) {
+  if (!authStore.isAuthenticated && !authStore.loading) {
     try {
       await authStore.checkAuth()
     } catch (error) {
-      console.error('Auth initialization failed:', error)
+      console.error('Auth initialization failed:', String(error).replace(/[\r\n]/g, ' '))
     }
+  } else if (authStore.loading) {
+    // Wait for an in-progress checkAuth to finish before deciding
+    await new Promise<void>((resolve) => {
+      const stop = setInterval(() => {
+        if (!authStore.loading) { clearInterval(stop); resolve() }
+      }, 50)
+    })
   }
 
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)

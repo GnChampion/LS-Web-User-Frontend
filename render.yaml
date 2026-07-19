@@ -13,4 +13,17 @@ services:
       # Prototype: disable the Firebase login wall (delivery flow needs no login).
       # Set to "true" later once the Firebase web client config is supplied.
       - key: VITE_REQUIRE_AUTH
-        value: "false"
+        value: "true"
+      # Firebase web client config (public keys — safe to commit).
+      - key: VITE_FIREBASE_API_KEY
+        sync: false
+      - key: VITE_FIREBASE_AUTH_DOMAIN
+        value: "land-scanner-webapp.firebaseapp.com"
+      - key: VITE_FIREBASE_PROJECT_ID
+        value: "land-scanner-webapp"
+      - key: VITE_FIREBASE_STORAGE_BUCKET
+        value: "land-scanner-webapp.firebasestorage.app"
+      - key: VITE_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: VITE_FIREBASE_APP_ID
+        sync: false

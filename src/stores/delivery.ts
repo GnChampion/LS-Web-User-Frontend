@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { db } from '@/services/firebase'
-import { collection, doc, onSnapshot, type Unsubscribe } from 'firebase/firestore'
+import { doc, onSnapshot, type Unsubscribe } from 'firebase/firestore'
 import type { DeliveredData } from '@/types'
 
 // One listener per zone_id. Cleaned up on zone change or logout.
@@ -28,7 +28,6 @@ export const useDeliveryStore = defineStore('delivery', () => {
    * Replaces any existing subscription.
    */
   function watchZone(zoneId: string) {
-    if (activeZoneId.value === zoneId) return
     _clearListeners()
     deliveries.value = {}
     activeZoneId.value = zoneId

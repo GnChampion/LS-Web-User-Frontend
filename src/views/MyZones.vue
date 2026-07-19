@@ -62,7 +62,7 @@
             >
               <div class="zone-card-header">
                 <div class="zone-main-info">
-                  <h3 class="zone-title">{{ zone.zone_name }}</h3>
+                  <h3 class="zone-title">{{ zone.zone_name || zone.zone_id }}</h3>
                   <span class="badge badge-primary">{{ (zone.quality ?? 'N/A').toUpperCase() }}</span>
                 </div>
                 <div class="zone-id">ID: {{ zone.zone_id }}</div>
@@ -75,8 +75,8 @@
                     <div class="detail-content">
                       <div class="detail-label">Coordinates</div>
                       <div class="detail-value">
-                        {{ zone.coordinates?.latitude?.toFixed(6) ?? 'N/A' }},
-                        {{ zone.coordinates?.longitude?.toFixed(6) ?? 'N/A' }}
+                        {{ (zone.coordinates?.latitude ?? zone.confirmed_v1?.lat)?.toFixed(6) ?? 'N/A' }},
+                        {{ (zone.coordinates?.longitude ?? zone.confirmed_v1?.lon)?.toFixed(6) ?? 'N/A' }}
                       </div>
                     </div>
                   </div>
@@ -86,7 +86,7 @@
                     <div class="detail-content">
                       <div class="detail-label">Area</div>
                       <div class="detail-value">
-                        {{ zone.area_size_feet }} × {{ zone.area_size_feet }} feet
+                        {{ zone.area_size_feet ? `${zone.area_size_feet} × ${zone.area_size_feet} feet` : 'N/A' }}
                       </div>
                     </div>
                   </div>
@@ -136,21 +136,27 @@ const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
 
 const zoneMarkers = computed(() =>
   zonesStore.zones
-    .filter((zone) => zone.coordinates?.latitude != null && zone.coordinates?.longitude != null)
+    .filter((zone) => {
+      const lat = zone.coordinates?.latitude ?? zone.confirmed_v1?.lat
+      const lng = zone.coordinates?.longitude ?? zone.confirmed_v1?.lon
+      return lat != null && lng != null
+    })
     .map((zone) => ({
-      lat: zone.coordinates.latitude,
-      lng: zone.coordinates.longitude,
-      label: zone.zone_name,
+      lat: zone.coordinates?.latitude ?? zone.confirmed_v1?.lat ?? 0,
+      lng: zone.coordinates?.longitude ?? zone.confirmed_v1?.lon ?? 0,
+      label: zone.zone_name || zone.zone_id,
       zoneId: zone.zone_id,
-      title: zone.zone_name
+      title: zone.zone_name || zone.zone_id
     }))
 )
 
 const mapCenter = computed(() => {
-  const withCoords = zonesStore.zones.filter((z) => z.coordinates?.latitude != null && z.coordinates?.longitude != null)
+  const withCoords = zonesStore.zones.filter((z) => {
+    return (z.coordinates?.latitude ?? z.confirmed_v1?.lat) != null
+  })
   if (withCoords.length > 0) {
-    const lat = withCoords.reduce((sum, z) => sum + z.coordinates.latitude, 0) / withCoords.length
-    const lng = withCoords.reduce((sum, z) => sum + z.coordinates.longitude, 0) / withCoords.length
+    const lat = withCoords.reduce((sum, z) => sum + (z.coordinates?.latitude ?? z.confirmed_v1?.lat ?? 0), 0) / withCoords.length
+    const lng = withCoords.reduce((sum, z) => sum + (z.coordinates?.longitude ?? z.confirmed_v1?.lon ?? 0), 0) / withCoords.length
     return { lat, lng }
   }
   return { lat: 11.0168, lng: 76.9558 }

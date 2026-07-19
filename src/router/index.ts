@@ -44,15 +44,13 @@ const router = createRouter({
     },
     {
       path: '/request',
-      name: 'request-zone',
-      component: () => import('@/views/RequestZone.vue'),
-      meta: { requiresAuth: true, title: 'Request a Zone - Land Scanner' }
+      redirect: '/request-zone'
     },
     {
       path: '/request-zone',
-      name: 'request-zone-v2',
+      name: 'request-zone',
       component: () => import('@/views/RequestZoneV2.vue'),
-      meta: { requiresAuth: true, title: 'Request a Zone (v2) - Land Scanner' }
+      meta: { requiresAuth: true, title: 'Request a Zone - Land Scanner' }
     },
     {
       path: '/analyze',

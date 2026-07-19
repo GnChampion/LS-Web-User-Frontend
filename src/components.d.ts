@@ -7,9 +7,14 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AppHeader: typeof import('./components/AppHeader.vue')['default']
+    DataTypeSelector: typeof import('./components/DataTypeSelector.vue')['default']
+    DeliveryCard: typeof import('./components/DeliveryCard.vue')['default']
+    DeliveryCompare: typeof import('./components/DeliveryCompare.vue')['default']
     DrawZone: typeof import('./components/DrawZone.vue')['default']
     GoogleMap: typeof import('./components/GoogleMap.vue')['default']
     Header: typeof import('./components/Header.vue')['default']
+    NotificationBell: typeof import('./components/NotificationBell.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

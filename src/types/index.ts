@@ -25,15 +25,19 @@ export interface Coordinates {
 // A zone stores BOTH a v1 point (xy) and an optional v2 border (Nxy).
 export interface Zone {
   zone_id: string
-  zone_name: string
-  coordinates: Coordinates
-  area_size_feet: number
-  quality: 'low' | 'medium' | 'high' | 'ultra'
+  zone_name?: string
+  coordinates?: Coordinates
+  area_size_feet?: number
+  quality?: 'low' | 'medium' | 'high' | 'ultra'
   status: string
   created_at?: any
   user_id?: string
-  xy?: { lat: number; lon: number }        // v1 — ALWAYS present (pointed zone)
-  borders?: Record<string, [number, number][]>  // v2 — drawn borders keyed by point count (e.g. "3xy")
+  // new spec: confirmed AOI
+  confirmed_v1?: { lat: number; lon: number } | null
+  confirmed_v2?: { coordinates: [number, number][] } | null
+  // legacy
+  xy?: { lat: number; lon: number }
+  borders?: Record<string, [number, number][]>
   has_v1?: boolean
   has_v2?: boolean
   tier_id?: string

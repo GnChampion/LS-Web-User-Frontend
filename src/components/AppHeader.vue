@@ -12,6 +12,7 @@
           <router-link to="/zones" class="nav-link" active-class="active">My Zones</router-link>
           <router-link to="/requests" class="nav-link" active-class="active">Requests</router-link>
           <router-link to="/profile" class="nav-link" active-class="active">Profile</router-link>
+          <NotificationBell />
           <button @click="handleLogout" class="btn btn-secondary btn-sm">Logout</button>
         </nav>
 
@@ -39,6 +40,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import NotificationBell from './NotificationBell.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

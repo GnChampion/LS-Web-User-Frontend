@@ -13,12 +13,10 @@ export const useZonesStore = defineStore('zones', () => {
 
   async function loadUserZones(userId: string) {
     loading.value = true
-    error.value = null
     try {
       zones.value = await apiService.getUserZones(userId)
     } catch (err: any) {
       console.error('Load zones error:', err)
-      error.value = err.message || 'Failed to load zones'
     } finally {
       loading.value = false
     }
@@ -26,12 +24,10 @@ export const useZonesStore = defineStore('zones', () => {
 
   async function loadZone(zoneId: string) {
     loading.value = true
-    error.value = null
     try {
       currentZone.value = await apiService.getZone(zoneId)
     } catch (err: any) {
       console.error('Load zone error:', err)
-      error.value = err.message || 'Failed to load zone'
     } finally {
       loading.value = false
     }
@@ -39,12 +35,10 @@ export const useZonesStore = defineStore('zones', () => {
 
   async function loadZoneImages(zoneId: string) {
     loading.value = true
-    error.value = null
     try {
       zoneImages.value = await apiService.getZoneImages(zoneId)
     } catch (err: any) {
       console.error('Load images error:', err)
-      error.value = err.message || 'Failed to load images'
     } finally {
       loading.value = false
     }
@@ -52,12 +46,10 @@ export const useZonesStore = defineStore('zones', () => {
 
   async function loadUserRequests(userId: string) {
     loading.value = true
-    error.value = null
     try {
       userRequests.value = await apiService.getUserRequests(userId)
     } catch (err: any) {
       console.error('Load requests error:', err)
-      error.value = err.message || 'Failed to load requests'
     } finally {
       loading.value = false
     }
@@ -91,14 +83,29 @@ export const useZonesStore = defineStore('zones', () => {
     }
   }
 
-  async function requestZoneV2(v1: { lat: number; lon: number } | null, v2: { coordinates: [number, number][] } | null, quality = 'high') {
+  async function requestZoneV2(v1: { lat: number; lon: number } | null, v2: { coordinates: [number, number][] } | null) {
     loading.value = true
     error.value = null
+    console.log('[requestZoneV2] Sending payload:', { v1, v2 })
     try {
-      const response = await apiService.requestZoneV2(v1, v2, quality)
+      const response = await apiService.requestZoneV2(v1, v2)
+      console.log('[requestZoneV2] Success response:', response)
       return response
     } catch (err: any) {
-      error.value = err?.response?.data?.detail || err?.message || 'Failed to submit zone'
+      const detail = err?.response?.data?.detail
+      console.error('[requestZoneV2] Error detail:', JSON.stringify(detail, null, 2), 'Full error:', err.response?.data)
+      if (Array.isArray(detail)) {
+        // Pydantic validation errors — extract human-readable messages
+        const messages = detail.map((d: any) => {
+          const loc = d.loc ? `[${d.loc.join('.')}]` : ''
+          const msg = d.msg || d.message || JSON.stringify(d)
+          return `${loc} ${msg}`.trim()
+        })
+        error.value = messages.join('; ')
+        console.error('[requestZoneV2] Parsed errors:', messages)
+      } else {
+        error.value = detail || err?.message || 'Failed to submit zone'
+      }
       return null
     } finally {
       loading.value = false

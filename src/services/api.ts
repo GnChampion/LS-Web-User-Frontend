@@ -212,7 +212,7 @@ export const apiService = {
   triggerTask: async (data: {
     zone_id: string
     modules: string[]
-    requirement: { aoi_version: 'v1' | 'v2'; output_type: string; resolution: string }
+    requirement: { aoi_version: 'v1' | 'v2'; output_type: string; resolution: string; provider?: string; time?: string }
     force_refresh?: boolean
   }) => {
     const response = await api.post('/api/v1/user/trigger-task', data)
@@ -221,10 +221,9 @@ export const apiService = {
 
   requestZoneV2: async (
     v1: { lat: number; lon: number } | null,
-    v2: { coordinates: [number, number][] } | null,
-    quality = 'high'
+    v2: { coordinates: [number, number][] } | null
   ) => {
-    const response = await api.post('/api/v1/user/request-zone', { v1, v2, quality })
+    const response = await api.post('/api/v1/user/request-zone', { v1, v2 })
     return response.data
   },
 }

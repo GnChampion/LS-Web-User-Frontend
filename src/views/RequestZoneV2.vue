@@ -8,28 +8,47 @@
 
         <div class="card">
           <div class="card-header">
-            <h2 class="card-title">Request a Zone (v1 point + v2 border)</h2>
-            <p class="card-subtitle">
-              Point your zone (v1) and optionally draw its border (v2, 3+ points).
-              Both are stored; v1 and v2 are separate areas.
-            </p>
+            <h2 class="card-title">Request a Zone</h2>
+            <p class="card-subtitle">Choose a zone type, then mark your area on the map.</p>
           </div>
 
           <div v-if="successMessage" class="alert alert-success">{{ successMessage }}</div>
-          <div v-if="error" class="alert alert-error">{{ error }}</div>
+          <div v-if="pendingMessage" class="alert alert-warning">{{ pendingMessage }}</div>
+          <div v-if="assignedMessage" class="alert alert-info">{{ assignedMessage }}</div>
+          <div v-if="zonesStore.error" class="alert alert-error">{{ zonesStore.error }}</div>
 
           <form @submit.prevent="handleSubmit">
+            <!-- Mode toggle -->
             <div class="form-group">
-              <label class="form-label" for="zoneName">Zone Name *</label>
-              <input id="zoneName" v-model="formData.zoneName" type="text" class="form-input"
-                     placeholder="e.g., Farm Land Area 1" required :disabled="loading" />
+              <label class="form-label">Zone Type</label>
+              <div class="mode-toggle">
+                <button
+                  type="button"
+                  class="mode-btn"
+                  :class="{ active: mode === 'v1' }"
+                  @click="setMode('v1')"
+                >
+                  📍 Point (v1)
+                  <span class="mode-desc">Single coordinate pin</span>
+                </button>
+                <button
+                  type="button"
+                  class="mode-btn"
+                  :class="{ active: mode === 'v2' }"
+                  @click="setMode('v2')"
+                >
+                  🔷 Polygon (v2)
+                  <span class="mode-desc">Draw a border (3+ points)</span>
+                </button>
+              </div>
             </div>
 
+            <!-- Map -->
             <div class="form-group">
-              <label class="form-label">Zone area on map</label>
+              <label class="form-label">Mark on Map</label>
               <DrawZone
                 :api-key="googleMapsApiKey"
-                :version="drawMode"
+                :version="mode"
                 :point="point"
                 :polygon="polygon"
                 :center="mapCenter"
@@ -38,74 +57,34 @@
                 @update:point="onPoint"
                 @update:polygon="onPolygon"
               />
-              <p class="form-hint">
-                v1: click once to drop the point marker. v2: switch to “Draw v2 border” and click 3+ times.
-              </p>
+              <p class="form-hint" v-if="mode === 'v1'">Click once on the map to drop a point marker.</p>
+              <p class="form-hint" v-else>Click 3+ times to draw a polygon border.</p>
             </div>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" for="latitude">Latitude (v1) *</label>
-                <input id="latitude" v-model.number="formData.latitude" type="number" step="any"
-                       class="form-input" placeholder="11.0168" required min="-90" max="90" :disabled="loading" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="longitude">Longitude (v1) *</label>
-                <input id="longitude" v-model.number="formData.longitude" type="number" step="any"
-                       class="form-input" placeholder="76.9558" required min="-180" max="180" :disabled="loading" />
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label" for="altitude">Altitude (meters) *</label>
-                <input id="altitude" v-model.number="formData.altitude" type="number" class="form-input"
-                       placeholder="100" required :disabled="loading" />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="areaSize">Area Size (feet) *</label>
-                <input id="areaSize" v-model.number="formData.areaSize" type="number" class="form-input"
-                       placeholder="50" required min="1" :disabled="loading" />
-              </div>
-            </div>
-
+            <!-- Status indicators -->
             <div class="form-group">
-              <label class="form-label" for="quality">Image Quality *</label>
-              <select id="quality" v-model="formData.quality" class="form-select" required :disabled="loading">
-                <option value="low">Low (Quick Preview)</option>
-                <option value="medium">Medium (Standard)</option>
-                <option value="high" selected>High (Detailed)</option>
-                <option value="ultra">Ultra (Maximum Detail)</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">v2 drawn border ({{ polygon.length }} points)</label>
-              <div class="version-tags">
-                <span class="vt vt-v1" :class="{ on: hasV1 }">v1 point {{ hasV1 ? '✓' : '' }}</span>
-                <span class="vt vt-v2" :class="{ on: hasV2 }">v2 border {{ hasV2 ? '✓' : '' }}</span>
+              <div class="status-tags">
+                <span v-if="mode === 'v1'" class="stag" :class="{ on: hasV1 }">
+                  📍 Point {{ hasV1 ? `✓ (${lat?.toFixed(4)}, ${lon?.toFixed(4)})` : '— not set' }}
+                </span>
+                <span v-else class="stag" :class="{ on: hasV2 }">
+                  🔷 Polygon {{ hasV2 ? `✓ (${polygon.length} pts)` : '— not drawn (3+ pts needed)' }}
+                </span>
               </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="notes">Additional Notes (Optional)</label>
-              <textarea id="notes" v-model="formData.notes" class="form-textarea"
-                        placeholder="Any specific requirements or details..." rows="4" :disabled="loading"></textarea>
             </div>
 
             <div class="info-box">
               <div class="info-icon">ℹ️</div>
               <div class="info-text">
-                <strong>Note:</strong> Your request is reviewed by an administrator (or auto-approved by Autopilot).
-                Once approved, the zone is collected and the delivered data appears under <em>My Zones</em>.
+                Zone creation is instant. After creation, go to the zone page to configure and run data collection (resolution, provider, modules, etc.).
               </div>
             </div>
 
             <div class="form-actions">
               <button type="button" class="btn btn-secondary" @click="$router.back()" :disabled="loading">Cancel</button>
-              <button type="submit" class="btn btn-primary" :disabled="loading">
+              <button type="submit" class="btn btn-primary" :disabled="loading || !canSubmit">
                 <span v-if="loading" class="loading"></span>
-                <span v-else>Submit Zone</span>
+                <span v-else>Create Zone</span>
               </button>
             </div>
           </form>
@@ -116,106 +95,234 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useZonesStore } from '@/stores/zones'
 import DrawZone from '@/components/DrawZone.vue'
 import AppHeader from '@/components/AppHeader.vue'
 
 const router = useRouter()
-const authStore = useAuthStore()
 const zonesStore = useZonesStore()
 
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''
 
-const successMessage = ref('')
-const error = ref('')
-const loading = ref(false)
-const drawMode = ref<'v1' | 'v2'>('v1')
+const successMessage  = ref('')
+const pendingMessage  = ref('')
+const assignedMessage = ref('')
 
-const formData = reactive({
-  zoneName: '',
-  latitude: null as number | null,
-  longitude: null as number | null,
-  altitude: 100,
-  areaSize: 50,
-  quality: 'high',
-  notes: ''
+onMounted(() => {
+  zonesStore.clearError()
 })
+const loading = ref(false)
 
-const point = ref<{ lat: number; lng: number } | null>(null)
+const mode    = ref<'v1' | 'v2'>('v1')
+const lat     = ref<number | null>(null)
+const lon     = ref<number | null>(null)
+const point   = ref<{ lat: number; lng: number } | null>(null)
 const polygon = ref<[number, number][]>([])
 
-const hasV1 = computed(() => !!formData.latitude && !!formData.longitude)
+const hasV1 = computed(() => lat.value !== null && lon.value !== null)
 const hasV2 = computed(() => polygon.value.length >= 3)
+// Backend V2 requires ≥4 points (closed polygon); auto-close before sending
+function closedPolygon(pts: [number, number][]): [number, number][] {
+  if (pts.length < 3) return pts
+  const first = pts[0], last = pts[pts.length - 1]
+  // Check if already closed
+  if (first[0] === last[0] && first[1] === last[1]) return pts
+  // Auto-close by adding first point at end
+  return [...pts, first]
+}
+const canSubmit = computed(() => mode.value === 'v1' ? hasV1.value : hasV2.value)
+
+// Debug helper to log the actual payload
+function debugPayload(v1: any, v2: any) {
+  console.log('[RequestZoneV2] Payload being sent:', JSON.stringify({ v1, v2 }, null, 2))
+}
 
 const mapCenter = computed(() => {
-  if (formData.latitude && formData.longitude) return { lat: formData.latitude, lng: formData.longitude }
+  if (lat.value && lon.value) return { lat: lat.value, lng: lon.value }
   return { lat: 11.0168, lng: 76.9558 }
 })
 
-function onPoint(p: { lat: number; lng: number }) {
-  formData.latitude = parseFloat(p.lat.toFixed(6))
-  formData.longitude = parseFloat(p.lng.toFixed(6))
+function setMode(m: 'v1' | 'v2') {
+  mode.value = m
+  if (m === 'v1') {
+    polygon.value = []
+  } else {
+    lat.value = null
+    lon.value = null
+    point.value = null
+  }
+  zonesStore.clearError()
 }
+
+function onPoint(p: { lat: number; lng: number }) {
+  lat.value = parseFloat(p.lat.toFixed(6))
+  lon.value = parseFloat(p.lng.toFixed(6))
+  point.value = p
+}
+
 function onPolygon(pts: [number, number][]) {
   polygon.value = pts
 }
 
-const handleSubmit = async () => {
+async function handleSubmit() {
   zonesStore.clearError()
-  error.value = ''
   successMessage.value = ''
-  loading.value = true
+  pendingMessage.value = ''
+  assignedMessage.value = ''
 
-  if (!formData.latitude || !formData.longitude) {
-    error.value = 'Please provide valid v1 coordinates (point on the map).'
-    loading.value = false
+  const v1 = mode.value === 'v1' && hasV1.value
+    ? { lat: lat.value!, lon: lon.value! }
+    : null
+  const v2 = mode.value === 'v2' && hasV2.value
+    ? { coordinates: closedPolygon(polygon.value) }
+    : null
+
+  if (!v1 && !v2) {
+    zonesStore.setError(mode.value === 'v1'
+      ? 'Please drop a point on the map first.'
+      : 'Please draw a polygon on the map first (3+ points).')
     return
   }
 
-  const v1 = { lat: formData.latitude, lon: formData.longitude }
-  const v2 = hasV2.value
-    ? { coordinates: polygon.value as [number, number][] }
-    : null
+  // Debug logging
+  debugPayload(v1, v2)
 
-  const result = await zonesStore.requestZoneV2(v1, v2, formData.quality)
+  // Validate v2 has at least 4 points after closing
+  if (v2 && v2.coordinates.length < 4) {
+    zonesStore.setError('Polygon must have at least 3 points (4 after auto-closing)')
+    return
+  }
+
+  loading.value = true
+  const result = await zonesStore.requestZoneV2(v1, v2)
   loading.value = false
 
   if (!result) {
-    error.value = zonesStore.error || 'Failed to submit zone'
+    // error already set by requestZoneV2 catch block
+    return
+  }
+
+  if (result.status === 'created') {
+    successMessage.value = 'Zone created! Redirecting to your zones…'
+    setTimeout(() => router.push('/zones'), 1500)
+    return
+  }
+
+  if (result.status === 'assigned') {
+    assignedMessage.value = result.message || 'An existing zone at this location has been assigned to your account.'
+    setTimeout(() => router.push('/zones'), 2500)
+    return
+  }
+
+  if (result.status === 'pending_admin') {
+    pendingMessage.value = result.message || 'Your zone request is pending admin review due to overlap with an existing zone.'
     return
   }
 
   if (result.status === 'blocked') {
-    error.value = result.message || 'Zone overlaps an existing zone'
+    zonesStore.setError(result.message || 'A zone already exists at this location.')
     return
   }
 
-  successMessage.value = 'Zone created successfully!'
-  setTimeout(() => router.push('/zones'), 2000)
+  zonesStore.setError(result.message || 'Unexpected response from server.')
 }
-
-
 </script>
 
 <style scoped>
 .page { min-height: 100vh; background: var(--gray-50); }
 .main-content { padding: var(--spacing-xl) 0; }
-.form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); }
-.form-actions { display: flex; gap: var(--spacing-md); justify-content: flex-end; margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--gray-200); }
-.info-box { display: flex; gap: var(--spacing-md); padding: var(--spacing-md); background: rgba(66, 153, 225, 0.1); border: 1px solid rgba(66, 153, 225, 0.3); border-radius: var(--radius-md); margin-bottom: var(--spacing-lg); }
+
+.mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 2px solid var(--gray-200, #e5e7eb);
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gray-500, #6b7280);
+  transition: all 0.15s;
+}
+.mode-btn:hover { border-color: var(--primary, #2563eb); color: var(--primary, #2563eb); }
+.mode-btn.active {
+  border-color: var(--primary, #2563eb);
+  background: #eff6ff;
+  color: var(--primary, #2563eb);
+}
+.mode-desc {
+  font-size: 11px;
+  font-weight: 400;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.status-tags { display: flex; gap: 8px; }
+.stag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  color: var(--gray-400, #9ca3af);
+  background: white;
+}
+.stag.on { background: #dcfce7; border-color: #86efac; color: #15803d; }
+
+.form-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--gray-200);
+}
+
+.info-box {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(66, 153, 225, 0.08);
+  border: 1px solid rgba(66, 153, 225, 0.25);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+}
 .info-icon { font-size: 20px; flex-shrink: 0; }
-.info-text { font-size: 14px; color: var(--gray-700); line-height: 1.5; }
+.info-text { font-size: 13px; color: var(--gray-600, #4b5563); line-height: 1.5; }
 .form-hint { font-size: 13px; color: var(--gray-500); margin-top: var(--spacing-sm); }
-.version-tags { display: flex; gap: 8px; }
-.vt { padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid var(--gray-200); color: var(--gray-400); }
-.vt.on { color: white; }
-.vt-v1.on { background: #dc2626; border-color: #dc2626; }
-.vt-v2.on { background: #2563eb; border-color: #2563eb; }
-@media (max-width: 768px) {
-  .form-row { grid-template-columns: 1fr; }
+
+.alert-warning {
+  background: #fef9c3;
+  color: #a16207;
+  border: 1px solid #fde047;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.alert-info {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .mode-toggle { grid-template-columns: 1fr; }
   .form-actions { flex-direction: column; }
   .form-actions .btn { width: 100%; }
 }
